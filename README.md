@@ -3,14 +3,14 @@
 # Shadowsocks-Rust one click install
 # Shadowsocks-Rust 一键安装脚本
 
-这是一个用于在 Linux 系统上安装 Shadowsocks-Rust 代理服务器的自动化脚本。该脚本支持 Ubuntu、Debian、CentOS 和 Armbian 系统。使用该脚本可以快速搭建一个安全的 Shadowsocks 服务器。
+这是一个用于在 Linux 系统上安装 Shadowsocks-Rust 代理服务器的自动化脚本。该脚本支持 Ubuntu、Debian、CentOS 和 Armbian 系统。使用该脚本可以快速搭建一个安全的 Shadowsocks 服务器
 
 ## 特性
 
-- 支持自定义密码、端口和加密方式。
-- 自动安装必要的依赖项。
-- 兼容主流 Linux 发行版（Ubuntu, Debian, CentOS, Armbian）。
-- 提供安装过程的实时输出和错误日志。
+- 支持自定义密码、端口和加密方式
+- 自动安装必要的依赖项
+- 兼容主流 Linux 发行版（Ubuntu, Debian, CentOS, Armbian）
+- 提供安装过程的实时输出和错误日志
   
 ## 支持的加密方式
 
@@ -30,8 +30,8 @@
 
 ## 系统要求
 
-- 支持的操作系统：Ubuntu, Debian, CentOS, Armbian。
-- 必须使用 root 权限或具备 sudo 权限的用户来执行安装命令。
+- 支持的操作系统：Ubuntu, Debian, CentOS, Armbian
+- 必须使用 root 权限或具备 sudo 权限的用户来执行安装命令
 
 ## 安装
 
@@ -45,11 +45,12 @@
 
 2. **安装参数**
 
---password <password>: 设置 Shadowsocks 服务器的密码。
---port <port>: 设置 Shadowsocks 服务器的端口，默认为随机18000-18999
---cipher <cipher>: 设置加密方式，默认为 aes-256-cfb
--y: 跳过确认步骤，自动进行安装。
-例如，如果你想要设置密码为 yourpassword，端口为 12345，加密方式为 chacha20-ietf-poly1305，可以使用如下命令：
+- --password <password>: 设置 Shadowsocks 服务器的密码
+- --port <port>: 设置 Shadowsocks 服务器的端口，默认为随机18000-18999
+- --cipher <cipher>: 设置加密方式，默认为 aes-256-cfb
+- -y: 跳过确认步骤，自动进行安装
+
+- 例如，如果你想要设置密码为 yourpassword，端口为 12345，加密方式为 chacha20-ietf-poly1305，可以使用如下命令：
 
    ```bash
    sudo bash ./install-shadowsocks-rust.sh --password yourpassword --port 12345 --cipher chacha20-ietf-poly1305 -y
@@ -73,4 +74,4 @@
    sudo bash ./install-shadowsocks-rust.sh --uninstall
    ```
 ## 贡献
-如果你遇到问题或有任何建议，欢迎提交 Issue 或 Pull Request。
+如果你遇到问题或有任何建议，欢迎提交 Issue 或 Pull Request
