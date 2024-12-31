@@ -1,3 +1,5 @@
+
+
 # Shadowsocks-Rust one click install
 # Shadowsocks-Rust 一键安装脚本
 
@@ -38,7 +40,7 @@
    在终端中运行以下命令来下载并运行脚本：
 
    ```bash
-   curl -SL https://api.miguan.vip/download/shadowsocks/release/setup_shadowsocks-rust.sh -o setup_shadowsocks-rust.sh && sudo chmod +x ./setup_shadowsocks-rust.sh && sudo bash ./setup_shadowsocks-rust.sh
+   curl -SL https://github.com/songyukuan/shadowsocks-rust-one-click-install/blob/main/install-shadowsocks-rust.sh -o install-shadowsocks-rust.sh && sudo chmod +x ./install-shadowsocks-rust.sh && sudo bash ./install-shadowsocks-rust.sh
    ```
 
 2. **安装参数**
@@ -50,7 +52,7 @@
 例如，如果你想要设置密码为 yourpassword，端口为 12345，加密方式为 chacha20-ietf-poly1305，可以使用如下命令：
 
    ```bash
-   sudo bash ./setup_shadowsocks-rust.sh --password yourpassword --port 12345 --cipher chacha20-ietf-poly1305 -y
+   sudo bash ./install-shadowsocks-rust.sh --password yourpassword --port 12345 --cipher chacha20-ietf-poly1305 -y
 
    ```
 ## 使用
@@ -68,7 +70,7 @@
 ## 卸载
 如果你想卸载 Shadowsocks 服务器，只需运行以下命令：
    ```bash
-   sudo bash ./setup_shadowsocks-rust.sh --uninstall
+   sudo bash ./install-shadowsocks-rust.sh --uninstall
    ```
 ## 贡献
 如果你遇到问题或有任何建议，欢迎提交 Issue 或 Pull Request。
