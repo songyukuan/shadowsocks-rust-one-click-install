@@ -57,12 +57,12 @@
 安装完成后，你的 Shadowsocks 服务器将自动启动并运行。你可以通过查看日志确认运行状态：
 
    ```bash
-   sudo systemctl status ss-rust
+   sudo systemctl status shadowsocks-rust
    ```
 你可以通过以下命令来停止或重启服务器：
    ```bash
-   sudo systemctl stop ss-rust
-   sudo systemctl restart ss-rust
+   sudo systemctl stop shadowsocks-rust
+   sudo systemctl restart shadowsocks-rust
    ```
 
 ## 卸载
@@ -72,6 +72,3 @@
    ```
 ## 贡献
 如果你遇到问题或有任何建议，欢迎提交 Issue 或 Pull Request。
-
-## 许可证
-本项目使用 MIT License 进行授权
