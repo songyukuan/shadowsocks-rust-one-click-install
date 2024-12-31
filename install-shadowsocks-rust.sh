@@ -2,12 +2,6 @@
 
 # Created by 灰太狼 (QQ: 5278212)
 # 2024/12/24 (Ver: 1.0.0)
-# curl -SL https://api.miguan.vip/download/shadowsocks/release/setup_shadowsocks-rust.sh -o setup_shadowsocks-rust.sh && sudo chmod +x ./setup_shadowsocks-rust.sh && sudo bash ./setup_shadowsocks-rust.sh
-# --password yourpassword
-# --port 12345
-# --cipher chacha20-ietf-poly1305
-# -y
-
 
 PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:~/bin
 export PATH
