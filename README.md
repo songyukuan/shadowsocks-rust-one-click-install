@@ -1,0 +1,1 @@
+# shadowsocks-rust-one-click-install
