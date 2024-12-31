@@ -12,7 +12,6 @@
 PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:~/bin
 export PATH
 LANG=en_US.UTF-8
-
 set -e
 set -o pipefail
 
@@ -78,7 +77,6 @@ print_info() {
     local message=$1
     local color=${2:-$GREEN}
     local timestamp=$(date +"%T")
-
     echo -e "${GREEN}[ $timestamp ]${RESET} ${color}$message${RESET}" >&2
 }
 
@@ -87,9 +85,7 @@ get_os_type() {
         . /etc/os-release
         OS_ID="$ID"
         OS_VERSION_ID="$VERSION_ID"
-
         print_info "Your system is ${OS_ID} ${OS_VERSION_ID}"
-
         case "$OS_ID" in
         "ubuntu" | "centos" | "debian" | "armbian")
             return 0
@@ -120,36 +116,27 @@ install_dependencies() {
     if [ "${OS_ID}" == "centos" ]; then
         yum update -y
         yum upgrade -y
-
         if [ ! -f /etc/yum.repos.d/epel.repo ]; then
             print_info "Installing EPEL repository ..."
             yum install -y -q epel-release
         fi
-
         if [ ! -f /etc/yum.repos.d/epel.repo ]; then
             print_info "EPEL repository installation failed, please check it" ${RED}
             return 1
         fi
-
         if ! command -v yum-config-manager >/dev/null; then
             print_info "Installing yum-utils ..."
             yum install -y -q yum-utils
         fi
-
         if [ "$(yum-config-manager epel | grep -w enabled | awk '{print $3}')" != "True" ]; then
             yum-config-manager --enable epel
             print_info "EPEL repository enabled"
         fi
-
         print_info "Installing required packages on CentOS..."
-
         packages="wget curl unzip openssl openssl-devel gettext gcc autoconf libtool automake make asciidoc xmlto libev-devel pcre pcre-devel git c-ares-devel jq python3 firewalld bzip2 xz"
-
         yum install -y ${packages}
-
     elif [ "${OS_ID}" == "ubuntu" ] || [ "${OS_ID}" == "debian" || "${OS_ID}" == "armbian" ]; then
         packages="wget curl libcurl4-openssl-dev gcc make zip unzip tar openssl libssl-dev libxml2 libxml2-dev zlib1g zlib1g-dev libjpeg-dev libpng-dev lsof libpcre3 libpcre3-dev cron net-tools swig build-essential libffi-dev libbz2-dev libncurses-dev libsqlite3-dev libreadline-dev tk-dev libgdbm-dev libdb-dev libdb++-dev libpcap-dev xz-utils git qrencode ruby lsb-release gettext python python-dev python-setuptools 2to3 python2 libev-dev libc-ares-dev jq firewalld bzip2"
-
         print_info "Updating and installing packages on Debian/Ubuntu..."
         sudo apt-get update -y
         sudo apt-get upgrade -y
@@ -167,18 +154,14 @@ download_release() {
     local package_name=$2
     local package_tag=$3
     local package_ass=$4
-
     if [ -z "${package_user}" ] || [ -z "${package_name}" ] || [ -z "${package_tag}" ] || [ -z "${package_ass}" ]; then
         print_info "Error: Missing required parameters." ${RED}
         return 1
     fi
-
     local file_name="${package_name}.${package_ass}"
     local download_url="https://github.com/${package_user}/releases/download/${package_tag}/${file_name}"
-
     print_info "Downloading from: ${download_url}"
     print_info "File name: ${file_name}, downloading ... "
-
     curl -sfL -o "${file_name}" "${download_url}"
     if [ $? -eq 0 ]; then
         print_info "Download successful: ${file_name}"
@@ -192,13 +175,9 @@ download_release() {
 install_package() {
     local file_path="$1"
     local install_command="$2"
-
     local extract_dir=""
-
     local file_name=$(basename "${file_path}")
-
     cd "${CURDIR}"
-
     if [[ "${file_name}" =~ \.tar\.bz2$ ]]; then
         extract_dir="${file_name%.tar.bz2}"
     elif [[ "${file_name}" =~ \.tar\.gz$ ]]; then
@@ -210,20 +189,16 @@ install_package() {
     else
         extract_dir="${file_name%.*}"
     fi
-
     if [ ! -f "${file_path}" ]; then
         print_info "Error: File not found: ${file_path}" ${RED}
         return 1
     fi
-
     if [ -d "${extract_dir}" ]; then
         print_info "Removing existing directory: ${extract_dir}"
         rm -rf "${extract_dir}"
     fi
-
     print_info "Extracting ${file_path}..."
     mkdir -p "${extract_dir}"
-
     print_info "file_path: ${file_path}, extract dir: ${extract_dir}"
     if [[ "${file_name}" == *.tar.bz2 ]]; then
         tar -xjf "${file_path}" -C "${extract_dir}" --strip-components=1 && [ -z "$(ls -A "${extract_dir}")" ] && tar -xjf "${file_path}" -C "${extract_dir}"
@@ -237,13 +212,11 @@ install_package() {
         print_info "Error: Unsupported archive format: ${file_name}" ${RED}
         return 1
     fi
-
     print_info "Changing to directory: ${extract_dir}"
     cd "${extract_dir}" || {
         print_info "Error: Failed to change directory to ${extract_dir}"
         return 1
     }
-
     print_info "Running custom install command: ${install_command}"
     eval "${install_command}"
     if [ $? -ne 0 ]; then
@@ -251,18 +224,14 @@ install_package() {
         cd "${CURDIR}"
         return 1
     fi
-
     print_info "Installation completed successfully."
-
     cd "${CURDIR}" || {
         print_info "Error: Failed to return to the original directory"
         return 1
     }
-
     print_info "Cleaning up..."
     rm -rf "${file_path}" "${extract_dir}"
     print_info "Cleanup completed."
-
     return 0
 }
 
@@ -271,16 +240,12 @@ install_libsodium() {
         print_info "Libsodium is already installed." # 提示已安装
         return 0
     fi
-
     local package_user="jedisct1/libsodium"
     local package_name="libsodium-1.0.20"
     local package_tag="1.0.20-RELEASE"
     local package_ass="tar.gz"
-
     local install_command="sudo ./configure --prefix=/usr && sudo make && sudo make install"
-
     local file_path=$(download_release "${package_user}" "${package_name}" "${package_tag}" "${package_ass}")
-
     if [ $? -eq 0 ]; then
         install_package "${file_path}" "${install_command}"
         ldconfig
@@ -295,16 +260,12 @@ install_mbedtls() {
         print_info "MbedTLS is already installed."
         return 0
     fi
-
     local package_user="Mbed-TLS/mbedtls"
     local package_name="mbedtls-3.6.2"
     local package_tag="mbedtls-3.6.2"
     local package_ass="tar.bz2"
-
     local install_command="sudo make SHARED=1 CFLAGS='-fPIC -std=c99' && sudo make DESTDIR=/usr install"
-
     local file_path=$(download_release "${package_user}" "${package_name}" "${package_tag}" "${package_ass}")
-
     if [ $? -eq 0 ]; then
         install_package "${file_path}" "${install_command}"
         ldconfig
@@ -319,16 +280,12 @@ install_v2ray_plugin() {
         print_info "V2ray-plugin is already installed." # 提示已安装
         return 0
     fi
-
     local package_user="shadowsocks/v2ray-plugin"
     local package_name="v2ray-plugin-linux-amd64-v1.3.2"
     local package_tag="v1.3.2"
     local package_ass="tar.gz"
-
     local install_command="sudo make SHARED=1 CFLAGS='-fPIC -std=c99' && sudo make DESTDIR=/usr install"
-
     local file_path=$(download_release "${package_user}" "${package_name}" "${package_tag}" "${package_ass}")
-
     if [ $? -eq 0 ]; then
         install_package "${file_path}" "${install_command}"
         ldconfig
@@ -337,11 +294,9 @@ install_v2ray_plugin() {
         return 1
     fi
 }
-
 version_gt() {
     test "$(echo "$@" | tr " " "\n" | sort -V | head -n 1)" != "$1"
 }
-
 check_kernel_version() {
     local kernel_version=$(uname -r | cut -d- -f1)
     if version_gt ${kernel_version} 3.7.0; then
@@ -350,23 +305,19 @@ check_kernel_version() {
         return 1
     fi
 }
-
 get_ipv4() {
     local IP=$(ip addr | egrep -o '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' | egrep -v "^192\.168|^172\.1[6-9]\.|^172\.2[0-9]\.|^172\.3[0-2]\.|^10\.|^127\.|^255\.|^0\." | head -n 1)
     [ -z ${IP} ] && IP=$(wget -qO- -t1 -T2 ipv4.icanhazip.com)
     [ -z ${IP} ] && IP=$(wget -qO- -t1 -T2 ipinfo.io/ip)
     [ ! -z ${IP} ] && echo ${IP} || echo
 }
-
 get_ipv6() {
     local IPV6=$(wget -qO- -t1 -T2 ipv6.icanhazip.com)
     [ ! -z ${IPV6} ] && echo ${IPV6} || echo
 }
-
 check_ip_address() {
     ipv4=$(get_ipv4)
     ipv6=$(get_ipv6)
-
     if [ -n "${ipv4}" ]; then
         print_info "IPv4 Address: ${ipv4}"
     else
@@ -385,7 +336,6 @@ set_sysctl_param() {
     local value=$2
     local sysctl_file="/etc/sysctl.conf"
     local full_param="net.ipv4.${param}"
-
     if grep -q "^${full_param}" "${sysctl_file}"; then
         sudo sed -i "s|^${full_param}.*|${full_param} = ${value}|" "${sysctl_file}"
         print_info "Updated '${full_param}' to ${value} in ${sysctl_file}"
@@ -393,7 +343,6 @@ set_sysctl_param() {
         echo "${full_param} = ${value}" | sudo tee -a "${sysctl_file}" >/dev/null
         print_info "Added '${full_param} = ${value}' to ${sysctl_file}"
     fi
-
     sudo sysctl -p
 }
 
@@ -417,31 +366,24 @@ LimitMEMLOCK=infinity
 [Install]
 WantedBy=multi-user.target
 EOF
-
     sudo chmod 0777 /etc/systemd/system/shadowsocks-rust.service
     sudo systemctl daemon-reload
     sudo systemctl enable shadowsocks-rust
     sudo systemctl start shadowsocks-rust
-
     if [ -z "${ipv6}" ]; then
         local server_value="\"0.0.0.0\""
     else
         local server_value="[\"[::0]\",\"0.0.0.0\"]"
     fi
-
     set_sysctl_param "tcp_fastopen" 3
-
     if check_kernel_version && [ $? -eq 0 ]; then
         fast_open="true"
     else
         fast_open="false"
     fi
-
     mkdir -p "/usr/local/shadowsocks-rust/${SS_HOST}"
-
     curl -sfL -o "/usr/local/shadowsocks-rust/${SS_HOST}/fullchain.pem" "http://${SS_HOST}/cert/fullchain.pem"
     curl -sfL -o "/usr/local/shadowsocks-rust/${SS_HOST}/privkey.pem" "http://${SS_HOST}/cert/privkey.pem"
-
     cat >/usr/local/shadowsocks-rust/config.json <<-EOF
 {
     "server":${server_value},
@@ -466,20 +408,15 @@ install_shadowsocks_rust() {
         print_info "Shadowsocks-rust is already installed." # 提示已安装
         return 0
     fi
-
     if [ ! -d /usr/local/shadowsocks-rust ]; then
         mkdir -p /usr/local/shadowsocks-rust
     fi
-
     local package_user="shadowsocks/shadowsocks-rust"
     local package_name="shadowsocks-v1.21.2.x86_64-unknown-linux-musl"
     local package_tag="v1.21.2"
     local package_ass="tar.xz"
-
     local install_command="sudo chmod +x * && sudo cp -af * /usr/local/shadowsocks-rust"
-
     local file_path=$(download_release "${package_user}" "${package_name}" "${package_tag}" "${package_ass}")
-
     if [ $? -eq 0 ]; then
         install_package "${file_path}" "${install_command}"
         install_v2ray_plugin
@@ -495,16 +432,12 @@ install_v2ray_plugin() {
         print_info "V2ray-plugin is already installed." # 提示已安装
         return 0
     fi
-
     local package_user="shadowsocks/v2ray-plugin"
     local package_name="v2ray-plugin-linux-amd64-v1.3.2"
     local package_tag="v1.3.2"
     local package_ass="tar.gz"
-
     local install_command="sudo mv ./v2ray-plugin_linux_amd64 /usr/local/shadowsocks-rust/v2ray-plugin && sudo chmod +x /usr/local/shadowsocks-rust/v2ray-plugin"
-
     local file_path=$(download_release "${package_user}" "${package_name}" "${package_tag}" "${package_ass}")
-
     if [ $? -eq 0 ]; then
         install_package "${file_path}" "${install_command}"
         ldconfig
@@ -517,17 +450,14 @@ install_v2ray_plugin() {
 config_firewalld() {
     sudo systemctl enable firewalld
     sudo systemctl start firewalld
-
     sshPort=$(cat /etc/ssh/sshd_config | grep 'Port ' | awk '{print $2}')
     firewall-cmd --permanent --zone=public --add-port=${sshPort}/tcp >/dev/null 2>&1
     firewall-cmd --permanent --zone=public --add-port=${ss_port}/tcp >/dev/null 2>&1
     firewall-cmd --reload
 }
-
 disable_selinux() {
     if [ -s /etc/selinux/config ]; then
         local selinux_config=$(cat /etc/selinux/config)
-
         if echo "${selinux_config}" | grep -q '^SELINUX=enforcing$'; then
             sed -i 's/^SELINUX=enforcing$/SELINUX=disabled/' /etc/selinux/config
             setenforce 0
@@ -544,12 +474,10 @@ if [ $(whoami) != "root" ]; then
     print_info "This script must be run as root or with sudo privileges." ${RED}
     exit 1
 fi
-
 if ! sudo -v; then
     print_info "This script requires sudo privileges. Please run as a user with sudo access." ${RED}
     exit 1
 fi
-
 clear
 echo -e "${GREEN}#########################################################"
 echo -e "#                                                       #"
@@ -561,13 +489,11 @@ echo -e "#          Alipay donation: ace0168@yeah.net            #"
 echo -e "#                Thank you for using                    #"
 echo -e "#                                                       #"
 echo -e "#########################################################${RESET}"
-
 if [ -z "${ss_pswd}" ]; then
     print_info "Please enter password for shadowsocks: " ${WHITE}
     read -p "(Default password: ${SS_PSWD}):" ss_pswd
     [ -z "${ss_pswd}" ] && ss_pswd="${SS_PSWD}"
 fi
-
 if [ -z "${ss_port}" ]; then
     while true; do
         print_info "Please enter a port for shadowsocks [1-65535]" ${WHITE}
@@ -582,7 +508,6 @@ if [ -z "${ss_port}" ]; then
         print_info "Please enter a correct number [1-65535]" ${YELLOW}
     done
 fi
-
 if [ -z "${ss_ciph}" ]; then
     while true; do
         print_info "Please select stream cipher for shadowsocks: " ${WHITE}
@@ -605,13 +530,11 @@ if [ -z "${ss_ciph}" ]; then
         break
     done
 fi
-
 print_info "---------------------------" ${BLUE}
 print_info "Shadowsocks port     : ${ss_port}" ${WHITE}
 print_info "Shadowsocks password : ${ss_pswd}" ${WHITE}
 print_info "Shadowsocks cipher   : ${ss_ciph}" ${WHITE}
 print_info "---------------------------" ${BLUE}
-
 while [[ "${choice_continue}" != "y" && "${choice_continue}" != "Y" && "${choice_continue}" != "n" && "${choice_continue}" != "N" ]]; do
     read -p "You can input 'y' to start, input 'n' or Ctrl+C to cancel (y/n): " choice_1
 done
@@ -620,10 +543,8 @@ if [[ "${choice_continue}" == "n" || "${choice_continue}" == "N" ]]; then
     print_info "Program terminated." ${RED}
     exit 0
 fi
-
 get_os_type
 disable_selinux
-
 out_put "[STEP] Install dependencies ..."
 install_dependencies
 check_ip_address
@@ -635,3 +556,9 @@ out_put "[STEP] Install shadowsocks ..."
 install_shadowsocks_rust
 out_put "[STEP] Set firewalld ..."
 config_firewalld
+print_info "---------------------------" ${BLUE}
+print_info "Your server IP       : ${ipv4}" ${WHITE}
+print_info "Shadowsocks port     : ${ss_port}" ${WHITE}
+print_info "Shadowsocks password : ${ss_pswd}" ${WHITE}
+print_info "Shadowsocks cipher   : ${ss_ciph}" ${WHITE}
+print_info "---------------------------" ${BLUE}
